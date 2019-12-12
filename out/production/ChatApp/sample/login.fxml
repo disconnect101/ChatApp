@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <children>
+      <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <SplitPane dividerPositions="0.36432160804020103" orientation="VERTICAL" prefHeight="385.0" prefWidth="600.0">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                     <children>
+                        <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <items>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                 <children>
+                                    <RadioButton fx:id="popServer" layoutX="208.0" layoutY="23.0" mnemonicParsing="false" onAction="#serverClient" text="Server">
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="tg" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                    <RadioButton fx:id="popClient" layoutX="306.0" layoutY="23.0" mnemonicParsing="false" onAction="#serverClient" text="Client" toggleGroup="$tg" />
+                                 </children>
+                              </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                 <children>
+                                    <TextField fx:id="popIP" layoutX="83.0" layoutY="17.0" />
+                                    <TextField fx:id="popPort" layoutX="330.0" layoutY="17.0" />
+                                    <Label layoutX="26.0" layoutY="22.0" text="IP:" />
+                                    <Label layoutX="281.0" layoutY="22.0" text="port:" />
+                                 </children>
+                              </AnchorPane>
+                          </items>
+                        </SplitPane>
+                     </children>
+                  </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                     <children>
+                        <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <items>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <TextField fx:id="loginID" layoutX="88.0" layoutY="54.0" />
+                                    <TextField fx:id="loginPW" layoutX="88.0" layoutY="135.0" />
+                                    <Label layoutX="14.0" layoutY="59.0" text="LogonID :" />
+                                    <Label layoutX="46.0" layoutY="140.0" text="p/w :" />
+                                    <Label layoutX="130.0" layoutY="14.0" text="Login" />
+                                    <Button fx:id="login" layoutX="116.0" layoutY="202.0" mnemonicParsing="false" onAction="#login" text="Login" AnchorPane.bottomAnchor="6.0" />
+                                 </children>
+                              </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="217.0" prefWidth="294.0">
+                                 <children>
+                                    <TextField fx:id="signUpLoginID" layoutX="81.0" layoutY="55.0" />
+                                    <TextField fx:id="signUpPW" layoutX="81.0" layoutY="136.0" />
+                                    <Label layoutX="14.0" layoutY="60.0" text="LoginID :" />
+                                    <Label layoutX="40.0" layoutY="141.0" text="p/w :" />
+                                    <Label layoutX="112.0" layoutY="14.0" text="SignUp" />
+                                    <Button fx:id="signUP" layoutX="76.0" layoutY="202.0" mnemonicParsing="false" onAction="#signUp" text="Create Account" AnchorPane.bottomAnchor="6.0" />
+                                 </children>
+                              </AnchorPane>
+                          </items>
+                        </SplitPane>
+                     </children>
+                  </AnchorPane>
+              </items>
+            </SplitPane>
+            <HBox alignment="CENTER" prefHeight="66.0" prefWidth="600.0">
+               <children>
+                  <Button fx:id="makeServer" mnemonicParsing="false" onAction="#makeServer" text="Make Server" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
