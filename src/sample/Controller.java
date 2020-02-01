@@ -1,5 +1,7 @@
 package sample;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,19 +24,26 @@ import java.util.Scanner;
 
 public class Controller {
     @FXML
-    TextArea textArea;
+    TextArea textArea,listtext;
     @FXML
     RadioButton popServer,popClient;
     @FXML
     Button send,login,signUP,config,makeServer;
     @FXML
     TextField textfield,popIP,popPort,loginID,loginPW,signUpLoginID,signUpPW;
+    @FXML
+    Label name;
+    @FXML
+    ListView<String> listview;
+    ObservableList list;
+
     ToggleGroup tg = new ToggleGroup();
     private Stage stage;
 
     private static int port;
-    private static String ip,port,lo;
-    private Controller configcontroller,parentcontroller;
+    private static int connectioncount;
+    static String ipSTR,portSTR,loginSTR,pwSTR,signuploginSTR,signuppwSTR;
+    private static Controller configcontroller,parentcontroller;
     private JdbcConnection jdbccon;
     private Connection DBconn;
 
@@ -42,6 +51,11 @@ public class Controller {
     private static Chatconnection con = null;
     private static ArrayList<ParallelReceiver> prarray = new ArrayList<>();
     private static ArrayList<Chatconnection> connarray = new ArrayList<>();
+
+
+    public void closeConnection() throws IOException {
+        con.objectsocket.close();
+    }
 
     public void openConfig(javafx.event.ActionEvent actionEvent){
         stage = new Stage();
@@ -77,6 +91,7 @@ public class Controller {
         stage.setScene(scene);
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initOwner(config.getScene().getWindow());
+        stage.setTitle("Configure");
         stage.showAndWait();
 
         /*popServer.setToggleGroup(tg);
@@ -110,7 +125,7 @@ public class Controller {
     }
 
     public void makeServer(javafx.event.ActionEvent actionEvent) throws SQLException {
-        parentcontroller.popPort.setText(popPort.getText());
+        portSTR = popPort.getText();
 
         parentcontroller._makeServer(actionEvent);
         stage.close();
@@ -118,34 +133,41 @@ public class Controller {
     }
 
 
-    public void login(javafx.event.ActionEvent actionEvent) throws SQLException {
+    public void login(javafx.event.ActionEvent actionEvent) throws SQLException, IOException, ClassNotFoundException {
         if(loginID.getText().equals("") || loginPW.getText().equals("") || popIP.getText().equals("") || popPort.getText().equals("")){
             return ;
         }
+        jdbccon = new JdbcConnection("root","","localhost");
 
-        DBconn = jdbccon.getConnection();
+        try {
+            DBconn = jdbccon.getConnection();
+        }
+        catch (Exception e){
+            System.out.println("Could not connect to DATABASE..");
+            e.printStackTrace();
+        }
+
         Statement st = DBconn.createStatement();
         st.execute("USE chatapp;");
 
         String loginid = loginID.getText();
         String pw = loginPW.getText();
+        System.out.println(loginid + " " + pw);
+        ResultSet rs = st.executeQuery("SELECT COUNT(`loginID`) AS `cnt` FROM `login` WHERE loginID LIKE '" + loginid + "' and password LIKE '" + pw + "';");
 
-        ResultSet rs = st.executeQuery("SELECT COUNT(loginID) AS cnt FROM `login` WHERE loginID='" + loginid + "' and password='" + pw + "';");
-        int cnt = rs.getInt("login");
-        if(cnt == 0){
+        rs.next();
+        String cnt = rs.getString(1);
+        if(cnt.equals("0")){
             textArea.appendText("Wrong loginID or password: cannot login" + "\n");
             stage.close();
         }
 
-        parentcontroller.popIP.setText(popIP.getText());
-        parentcontroller.popPort.setText(popPort.getText());
-        parentcontroller.loginID.setText(loginID.getText());
-        parentcontroller.loginPW.setText(loginPW.getText());
-        parentcontroller.signUpLoginID.setText(signUpLoginID.getText());
-        parentcontroller.signUpPW.setText(signUpPW.getText());
-        parentcontroller.login.setText(login.getText());
-        parentcontroller.signUP.setText(signUP.getText());
-        parentcontroller.makeServer.setText(makeServer.getText());
+        ipSTR = popIP.getText();
+        portSTR = popPort.getText();
+        loginSTR = loginID.getText();
+        pwSTR = loginPW.getText();
+        signuploginSTR = signUpLoginID.getText();
+        signuppwSTR = signUpPW.getText();
 
         parentcontroller._login(actionEvent);
         stage.close();
@@ -153,27 +175,32 @@ public class Controller {
 
 
 
-    public void signUp(javafx.event.ActionEvent actionEvent) throws SQLException {
+    public void signUp(javafx.event.ActionEvent actionEvent) throws SQLException, IOException, ClassNotFoundException {
         if(signUpLoginID.getText().equals("") || signUpPW.getText().equals("") || popIP.getText().equals("") || popPort.getText().equals("")){
             return ;
         }
+        jdbccon = new JdbcConnection("root","","localhost");
 
-        DBconn = jdbccon.getConnection();
+        try {
+            DBconn = jdbccon.getConnection();
+        }
+        catch (Exception e){
+            System.out.println("Could not connect to DATABASE..");
+            e.printStackTrace();
+        }
+
         Statement st = DBconn.createStatement();
         st.execute("USE chatapp;");
         String loginid = signUpLoginID.getText();
         String pw = signUpPW.getText();
-        st.execute("INERT INTO `login` VALUES('" + loginid + "','" + pw + "');");
+        st.execute("INSERT INTO `login` VALUES('" + loginid + "','" + pw + "');");
 
-        parentcontroller.popIP.setText(popIP.getText());
-        parentcontroller.popPort.setText(popPort.getText());
-        parentcontroller.loginID.setText(loginID.getText());
-        parentcontroller.loginPW.setText(loginPW.getText());
-        parentcontroller.signUpLoginID.setText(signUpLoginID.getText());
-        parentcontroller.signUpPW.setText(signUpPW.getText());
-        parentcontroller.login.setText(login.getText());
-        parentcontroller.signUP.setText(signUP.getText());
-        parentcontroller.makeServer.setText(makeServer.getText());
+        ipSTR = popIP.getText();
+        portSTR = popPort.getText();
+        loginSTR = loginID.getText();
+        pwSTR = loginPW.getText();
+        signuploginSTR = signUpLoginID.getText();
+        signuppwSTR = signUpPW.getText();
 
         parentcontroller._signUp(actionEvent);
         stage.close();
@@ -183,14 +210,20 @@ public class Controller {
 
 
     public void _makeServer(javafx.event.ActionEvent actionEvent){
+        name.setText("Server");
+        textfield.setDisable(true);
+        send.setDisable(true);
         serverOn(actionEvent);
     }
 
-    public void _login(javafx.event.ActionEvent actionEvent){
+    public void _login(javafx.event.ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+        name.setText(loginSTR);
         clientOn(actionEvent);
     }
 
-    public void _signUp(javafx.event.ActionEvent actionEvent){
+    public void _signUp(javafx.event.ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+        name.setText(signuploginSTR);
+        loginSTR = signuploginSTR;
         clientOn(actionEvent);
     }
 
@@ -199,31 +232,51 @@ public class Controller {
 
 
     public void serverOn(javafx.event.ActionEvent actionEvent) {
-            port = Integer.parseInt(popPort.getText());
+            port = Integer.parseInt(portSTR);
+            System.out.println(port);
 
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     ServerSocket ss = null;
+                    Message message = null;
                     try {
                         ss = new ServerSocket(port);
+                        CurrOnline currOnline = new CurrOnline(connarray);    //// to send currently online info to all connected.
+                        currOnline.start();
                     } catch (IOException e) {
                         textArea.appendText("Could not set up server, Maybe another server or service is already running on this port; enter different port or ip" + "\n");
                         e.printStackTrace();
                     }
                     while (true) {
-                        int size = connarray.size();
+                        //int size = connarray.size();
                         try {
                             con = new Chatconnection(null, port, ss);
                             connarray.add(con);
-                            con.conID = size;
-                            con.sendMessage(String.valueOf(size));
+                            con.conID = connectioncount++;
+                            message = new Message();
+                            message.setMsg(String.valueOf(con.conID));
+                            con.sendObject(message);
                         } catch (Exception e) {
                             System.out.print("Could not connect : ");
                             e.printStackTrace();
                             return;
                         }
-                        ParallelReceiver pr = new ParallelReceiver(con, connarray, textArea);
+                        //String loginID = null;
+                        /*try {
+                            message = (Message) con.receiveObject();    ///// to receive login Id of client
+                            loginID = message.getMsg();
+                        } catch (IOException | ClassNotFoundException e) {
+                            e.printStackTrace();
+                         }*/
+                        ParallelReceiver pr = null;
+                        try {
+                            pr = new ParallelReceiver(con, connarray, textArea);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
                         prarray.add(pr);
                         pr.start();
                     }
@@ -236,21 +289,21 @@ public class Controller {
 
 
 
-    public void clientOn(javafx.event.ActionEvent actionEvent) {
-            port = Integer.parseInt(popPort.getText());
-            ip = popIP.getText();
+    public void clientOn(javafx.event.ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+            port = Integer.parseInt(portSTR);
+            String ip = ipSTR;
             try {
                 con = new Chatconnection(ip, port, null);
                 System.out.println("con : " + con);
-                con.conID = Integer.parseInt(con.receiveMessage());
-                System.out.println("conID : " + con.conID);
             } catch (Exception ex) {
                 System.out.print("could not connect : ");
                 ex.printStackTrace();
                 return;
             }
-
-            ParallelClientReceiver pcr = new ParallelClientReceiver(con, textArea);
+            con.loginSTR = loginSTR;
+            //list = FXCollections.observableArrayList();
+            //listview.setItems(list);
+            ParallelClientReceiver pcr = new ParallelClientReceiver(con, textArea,listview);
             pcr.start();
 
         /*while(true){
@@ -276,9 +329,10 @@ public class Controller {
         System.out.println(con);
 
         try{
-            s = "Client." + con.conID + ": " + s ;
             System.out.println(con);
-            con.sendMessage(s);
+            Message message = new Message();
+            message.setMsg(s);
+            con.sendObject(message);
         }
         catch (Exception ex){
             System.out.println("Could not send : ");
@@ -290,7 +344,8 @@ public class Controller {
 
     @FXML
     public void initialize() throws SQLException {
-        jdbccon = new JdbcConnection("root","","localhost");    }
+
+    }
 
 }
 
